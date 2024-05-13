@@ -1,0 +1,14 @@
+<div class="container my-5">
+    <div class="h1" style="font-size: 25px; padding-left: 12px; padding-bottom: 15px;;" > My Portfolio</div>
+  
+  <div class="container" *ngIf="!list">
+    <ngb-alert type="warning" [dismissible]="false" class="text-center" >
+      Currently you don't have any stock.
+    </ngb-alert>
+  </div>
+  
+  <!-- <div class="container  d-flex justify-content-center align-items-center" *ngIf="!loaded" >
+    <mat-spinner color="#6F4FFB"></mat-spinner>
+  </div> -->
+  
+  

@@ -7,4 +7,14 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'stock-search';
+  activeLink = '';
+  isCollapsed = true;
+  
+  setActiveLink(link: string): void {
+    this.activeLink = link;
+  }
+  toggleNavbar() {
+    this.isCollapsed = !this.isCollapsed;
+  }
+
 }

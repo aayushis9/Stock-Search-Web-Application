@@ -1,0 +1,45 @@
+<div class="container my-5">
+  <div class="h1" style="font-size: 25px; padding-left: 12px; padding-bottom: 15px;;" > My Watchlist</div>
+
+
+  <div *ngIf="!loaded" class="container  d-flex justify-content-center align-items-center"  >
+    <mat-spinner color="#6F4FFB"></mat-spinner>
+  </div>
+
+  
+
+  <div *ngIf="watchlist.length > 0; else noStocks" class="row">
+    <div *ngFor="let stock of this.watchlist">
+      <div class="card" >
+        <button style="max-width: 20px; background-color: white; outline: none; border: none;" type="button" class="close" aria-label="Close" (click)="removeWatchlist(stock.ticker)">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <div class="card-body"  style="display: flex; justify-content: space-between;">
+          
+          <div class="watchlist-stock">
+            <h5 class="card-title">{{ stock.ticker }}</h5>
+            <p>{{ stock.name }}</p>
+          </div>
+          <div class="watchlist-price">
+            <h2 [ngStyle]="{'color': stock.pData.d > 0 ? 'green' : 'red'}">
+              {{stock.pData.c}}
+            </h2> 
+            <p [ngStyle]="{'color': stock.pData.d > 0 ? 'green' : 'red'}">
+              <img *ngIf="stock.pData.d>0" src="../../assets/caret-up.svg">
+              <img *ngIf="stock.pData.d<0" src="../../assets/caret-down.svg">
+              {{stock.pData.d | number:'1.2-2'}},({{stock.pData.dp | number:'1.2-2'}}%)
+          </p>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noStocks>
+    <ngb-alert type="warning" [dismissible]="false" class="text-center">
+      Currently, you don't have any stocks in your watchlist.
+    </ngb-alert>
+  </ng-template>
+</div>
+

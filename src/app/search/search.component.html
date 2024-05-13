@@ -1,0 +1,263 @@
+
+<div class="container">
+    <h1 style="text-align: center;font-size: 20px; font-family: 'Calibri', sans-serif; font-weight: normal; padding-top: max(25px); line-height: 1.4; margin-bottom: 20px;"><b>STOCK SEARCH</b></h1>
+    <div class="row">
+        <div class="col"></div>
+        
+        <div class="col-5" style=" min-width: 150px; position: relative;">
+            <form>
+                <div matAutocompleteOrigin #origin="matAutocompleteOrigin">
+                <input
+                    [formControl]="myControl"
+                    [matAutocomplete]="auto"  required type="text" class="form-control"
+                    style="border-radius: 50px; border: solid #00008B; width: 100%;" placeholder="Enter stock ticker symbol" />
+                </div>
+
+                <div style="margin-left: 100px;">
+                <mat-autocomplete #auto="matAutocomplete"  [panelWidth]="175">
+                    <mat-option *ngIf="isLoading" class="is-loading"><mat-spinner diameter="40"></mat-spinner></mat-option>
+                    <ng-container *ngIf="!isLoading" >
+
+                        <mat-option *ngFor="let option of filteredOptions" [value]="option.symbol">
+                            <span>{{option.symbol}}</span> | <span style="font-size: 12px;">{{option.description}}</span>
+                        </mat-option>
+
+                    </ng-container>
+                </mat-autocomplete>
+                </div>
+
+                <button type="submit" class="search" (click)="showDetails()">
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-search" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.414 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z"/>
+                        <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z"/>
+                    </svg>
+                </button>
+
+                <button type="button" class="clear" (click)="clearScreenAndTicker()">
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                </button>
+
+            </form>
+        </div>
+        <div class="col"></div>
+    </div>
+
+<div *ngIf="stock">
+    <div class="d-flex justify-content-between w-100 price-row-1" >
+      <div class="stock-info">
+        <p style="font-size: 30px;">{{stock.ticker}}
+            <button *ngIf="star_fill == false" id="empty_star" (click)="clickstar()" style="outline: none; margin-top: 0; text-decoration: none; border: none; background-color: white;">
+                <svg width="25px" height="25px" viewBox="0 0 16 16" class="bi bi-star" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.523-3.356c.329-.314.158-.888-.283-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767l-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288l1.847-3.658 1.846 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.564.564 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"/>
+                </svg>
+            </button>
+    
+            <button *ngIf="star_fill == true" id="filled_star" (click)="clickstar()" style="outline: none; margin-top: 0; text-decoration: none; border: none; background-color: white;">
+                <svg width="25px" height="25px" viewBox="0 0 16 16" class="bi bi-star-fill" fill="#fdd500" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.283.95l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                </svg>
+            </button>    
+        </p>
+
+        
+        <h2 style="font-size: 25px;">{{stock.name}}</h2>
+        <p>{{stock.exchange}}</p>
+        <button class="buy-button" (click)="openTransactionModal(transactionModal, 'buy')">Buy</button>
+        <button class="sell-button" *ngIf="hasPurchased(stock.symbol)" (click)="openTransactionModal(transactionModal, 'sell')">Sell</button>
+
+        <ng-template #transactionModal let-modal>
+            <div class="modal-header" >
+              <h1>{{ stock.ticker }}</h1>
+              <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Current Price: {{ price.c | currency }}</p>
+              <p>Money in Wallet: {{ moneyInWallet | currency }}</p>
+              <p>Quantity: <input type="number" [(ngModel)]="quantity" (ngModelChange)="calculateTotal()" placeholder="Quantity" min="1"></p>
+            </div>
+            <div class="modal-footer">
+              <p class="me-auto">Total Price: {{ totalPrice }}</p>
+              <button type="button" [disabled]="!isValidTransaction" (click)="executeTransaction()">{{transactionType | uppercase}}</button>
+            </div>
+        </ng-template>
+          
+      </div>
+
+      <div>
+        <img style="width:15% ; margin: 0 37.5%;" *ngIf="(stock.logo)" [src]="stock.logo" alt="Company Logo">
+      </div>
+
+      <div class="stock-price">
+        <h2 [ngStyle]="{'color': price.d > 0 ? 'green' : 'red'}">
+          {{price.c}}
+        </h2>
+        <p [ngStyle]="{'color': price.d > 0 ? 'green' : 'red'}">
+            <img *ngIf="price.d>0" src="../../assets/caret-up.svg">
+            <img *ngIf="price.d<0" src="../../assets/caret-down.svg">
+            {{price.d | number:'1.2-2'}},({{price.dp | number:'1.2-2'}}%)
+        </p>
+
+        <p>{{this.now | date:'yyyy-MM-dd HH:mm:ss'}}</p>
+      </div>
+    </div>
+
+    <div [ngStyle]="{'text-align': 'center', 'padding-top': '15px', 'font-weight': 'bold'}">
+        <span [ngStyle]="{'color': marketStatus ? 'green' : 'rgb(248,214,216)' }" *ngIf="marketStatus">Market is Open</span>
+        <span [ngStyle]="{'color': marketStatus ? 'red' : 'rgb(248,214,216)' }" *ngIf="!marketStatus">Market closed on {{ price.prevOpenTimestamp | date:'yyyy-MM-dd HH:mm:ss' }}</span>
+      </div>
+
+
+
+    <mat-tab-group animationDuration="0ms">
+        <mat-tab label="Summary">
+
+            <div *ngIf="stock">
+                <div class="div1">
+                    <div><strong>High Price:</strong> {{price.h}}</div>
+                    <div><strong>Low Price:</strong> {{price.l}}</div>
+                    <div><strong> Open Price:</strong> {{price.o}}</div>
+                    <div><strong>Prev.Close:</strong> {{price.pc}}</div>
+                </div>
+
+                <div class="div2">
+                    <h1 style=" margin-top: 3%; font-size: 25px; text-decoration: underline;">About the Company</h1>
+                    <div style="margin-left: 3%;"><strong>IPO Start Date:</strong> {{stock.ipo}}</div>
+                    <div style="margin-left: 4%;"><strong>Industry:</strong> {{stock.finnhubIndustry}}</div>
+                    <a style="margin-left: 3%;" href="{{stock.weburl}}" target="_blank">Webpage</a>
+
+                    <h3 style="font-size: 17px; margin-left: 5%; margin-top: 1%;">Company Peers:</h3>
+                    <div *ngIf="peers; elsenoPeers" class="peers-list">
+                        <span *ngFor="let peer of this.peers">
+                        <a [routerLink]="['/search', peer]">{{peer}}</a>
+
+                        <ng-template #loading>
+                            <p>Loading...</p>
+                        </ng-template>
+
+                        <ng-template #noPeers>
+                            <p>No peers available.</p>
+                        </ng-template>
+                        </span>
+                    </div>
+                </div>
+                <div id="container" *ngIf="chartOptions2">
+                    <highcharts-chart 
+                      [Highcharts]="Highcharts"
+                      [options]="chartOptions2"
+                      style="width: 50%; height: 400px; display: block;">
+                    </highcharts-chart>
+                </div>
+
+            </div>
+        </mat-tab>
+
+        <mat-tab label="Top News">
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="news-card" *ngFor="let newsItem of news | slice:0:10"(click)="openModal(modalContent, newsItem)">
+                            <img [src]="newsItem.image" alt="News Image" width="50px">
+                            <h2>{{ newsItem.headline }}</h2>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                            <div class="news-card" *ngFor="let newsItem of news | slice:10:20"(click)="openModal(modalContent, newsItem)">
+                                <img [src]="newsItem.image" alt="News Image" width="50px">
+                                <h2>{{ newsItem.headline }}</h2>
+                            </div>
+                    </div>
+                  </div>
+            </div>
+            <ng-template #modalContent let-modal="close">
+                <div class="modal-head">
+                    <h1 class="modal-title">{{ selectedNews?.source }}</h1>
+                    <h4>{{selectedNews.datetime}}</h4>
+                    <button type="button" class="close" aria-label="Close" (click)="modal()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body my-modal-size">
+                    <h4>{{selectedNews.headline}}</h4>
+                    <p>{{ selectedNews.summary }}</p>
+                    <p>For more details click <a href="{{selectedNews?.url }}" target="_blank">here</a>.</p>
+
+                <div class="modal-body my-modal-size">
+                    <h4>Share</h4>
+                    <a href="https://twitter.com/share?text={{ selectedNews?.headline}}&url={{ selectedNews?.url }}" target="_blank" >
+                        <img src="/assets/twitter-logo.jpeg" alt="Share on Twitter" width="30">
+                    </a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ selectedNews?.url }}" target="_blank">
+                        <i class="fab fa-facebook-square fa-2x"></i>
+                        <img src="/assets/facebook-logo.jpeg" alt="Share on Facebook" width="30">
+                    </a>
+
+                </div>
+                    
+                </div>
+            </ng-template>
+        </mat-tab>
+
+        <mat-tab label="Charts">
+            <div *ngIf="Highcharts">
+                <highcharts-chart
+                  class="Highcharts w-100"
+                  [Highcharts]="this.Highcharts"
+                  [options]="this.chartOptions"
+                  style="width: 100%; height: 600px; display: block;">
+                </highcharts-chart>
+            </div>
+        </mat-tab>
+
+
+        <mat-tab label="Insights">
+            <div style="justify-content: space-around; text-align: center; display: flex; width: 100%;">
+                <div class="insight-table" style="width: fit-content;">
+
+                    <h3>Insider Sentiment</h3>
+                    <table class="table table-bordered" style="width: 380px;">
+                        <thead>
+                        <tr>
+                            <th scope="col" style="border: none;">{{ symbol }}</th>
+                            <th scope="col" style="border: none;">MSPR</th>
+                            <th scope="col" style="border: none;">Change</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row" style="border: none;">Total</th>
+                            <td style="border: none;">{{ aggregatedData.totalMspr }}</td>
+                            <td style="border: none;">{{ aggregatedData.totalChange }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" style="border: none;">Positive</th>
+                            <td style="border: none;">{{ aggregatedData.positiveMspr }}</td>
+                            <td style="border: none;">{{ aggregatedData.positiveChange }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" style="border: none;">Negative</th>
+                            <td style="border: none;">{{ aggregatedData.negativeMspr }}</td>
+                            <td style="border: none;">{{ aggregatedData.negativeChange }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            
+
+        </mat-tab>
+
+    </mat-tab-group>
+</div>
+<ng-template *ngIf="this.pageLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+</ng-template>
+
+
+
+
